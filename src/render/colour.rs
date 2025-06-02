@@ -1,5 +1,5 @@
 pub struct Colour {
-    pub r: f32,
-    pub g: f32,
-    pub b: f32
+    pub r: f64,
+    pub g: f64,
+    pub b: f64,
 }

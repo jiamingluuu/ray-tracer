@@ -1,117 +1,101 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign};
 
-use super::point4::Point4;
+use super::vec4::Vec4;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Point3 {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
+pub struct Vec3 {
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
 
-impl Point3 {
-    #[inline]
-    pub const fn new(x: f32, y: f32, z: f32) -> Self {
+impl Vec3 {
+    pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
     }
 
-    #[inline]
     pub const fn zero() -> Self {
         Self::new(0.0, 0.0, 0.0)
     }
 
-    #[inline]
     pub fn has_nans(&self) -> bool {
         self.x.is_nan() || self.y.is_nan() || self.z.is_nan()
     }
 
-    #[inline]
-    pub fn dot(&self, rhs: &Point3) -> f32 {
+    pub fn dot(&self, rhs: &Vec3) -> f64 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
 
-    #[inline]
-    pub fn cross(&self, rhs: &Point3) -> Point3 {
-        Point3 {
+    pub fn cross(&self, rhs: &Vec3) -> Vec3 {
+        Vec3 {
             x: self.y * rhs.z - self.z * rhs.y,
             y: self.z * rhs.x - self.x * rhs.z,
             z: self.x * rhs.y - self.y * rhs.x,
         }
     }
 
-    #[inline]
-    pub fn length_squared(&self) -> f32 {
+    pub fn length_squared(&self) -> f64 {
         self.dot(self)
     }
 
-    #[inline]
-    pub fn length(&self) -> f32 {
+    pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
 
-    #[inline]
-    pub fn normalize(&self) -> Point3 {
+    pub fn normalize(&self) -> Vec3 {
         let len = self.length();
         debug_assert!(len > 0.0, "Cannot normalize zero-length vector");
         *self / len
     }
 
-    #[inline]
-    pub fn normalized(&self) -> Point3 {
+    pub fn normalized(&self) -> Vec3 {
         let len = self.length();
         debug_assert!(len > 0.0, "Cannot normalize zero-length vector");
         *self / len
     }
 
-    #[inline]
-    pub fn normalize_or_zero(&self) -> Point3 {
+    pub fn normalize_or_zero(&self) -> Vec3 {
         let len_sq = self.length_squared();
-        if len_sq > f32::EPSILON {
+        if len_sq > f64::EPSILON {
             *self / len_sq.sqrt()
         } else {
-            Point3::zero()
+            Vec3::zero()
         }
     }
 }
 
-impl Default for Point3 {
-    #[inline]
+impl Default for Vec3 {
     fn default() -> Self {
         Self::zero()
     }
 }
 
-impl From<[f32; 3]> for Point3 {
-    #[inline]
-    fn from(arr: [f32; 3]) -> Self {
+impl From<[f64; 3]> for Vec3 {
+    fn from(arr: [f64; 3]) -> Self {
         Self::new(arr[0], arr[1], arr[2])
     }
 }
 
-impl From<Point3> for [f32; 3] {
-    #[inline]
-    fn from(p: Point3) -> Self {
+impl From<Vec3> for [f64; 3] {
+    fn from(p: Vec3) -> Self {
         [p.x, p.y, p.z]
     }
 }
 
-impl From<(f32, f32, f32)> for Point3 {
-    #[inline]
-    fn from((x, y, z): (f32, f32, f32)) -> Self {
+impl From<(f64, f64, f64)> for Vec3 {
+    fn from((x, y, z): (f64, f64, f64)) -> Self {
         Self::new(x, y, z)
     }
 }
 
-impl From<Point3> for (f32, f32, f32) {
-    #[inline]
-    fn from(p: Point3) -> Self {
+impl From<Vec3> for (f64, f64, f64) {
+    fn from(p: Vec3) -> Self {
         (p.x, p.y, p.z)
     }
 }
 
-impl From<Point4> for Point3 {
-    #[inline]
-    fn from(p: Point4) -> Self {
+impl From<Vec4> for Vec3 {
+    fn from(p: Vec4) -> Self {
         Self {
             x: p.x / p.w,
             y: p.y / p.w,
@@ -120,11 +104,10 @@ impl From<Point4> for Point3 {
     }
 }
 
-impl Add<Point3> for Point3 {
-    type Output = Point3;
-    #[inline]
-    fn add(self, other: Point3) -> Self::Output {
-        Point3 {
+impl Add<Vec3> for Vec3 {
+    type Output = Vec3;
+    fn add(self, other: Vec3) -> Self::Output {
+        Vec3 {
             x: self.x + other.x,
             y: self.y + other.y,
             z: self.z + other.z,
@@ -132,20 +115,18 @@ impl Add<Point3> for Point3 {
     }
 }
 
-impl AddAssign<Point3> for Point3 {
-    #[inline]
-    fn add_assign(&mut self, other: Point3) {
+impl AddAssign<Vec3> for Vec3 {
+    fn add_assign(&mut self, other: Vec3) {
         self.x += other.x;
         self.y += other.y;
         self.z += other.z;
     }
 }
 
-impl Sub<Point3> for Point3 {
-    type Output = Point3;
-    #[inline]
-    fn sub(self, other: Point3) -> Self::Output {
-        Point3 {
+impl Sub<Vec3> for Vec3 {
+    type Output = Vec3;
+    fn sub(self, other: Vec3) -> Self::Output {
+        Vec3 {
             x: self.x - other.x,
             y: self.y - other.y,
             z: self.z - other.z,
@@ -153,20 +134,18 @@ impl Sub<Point3> for Point3 {
     }
 }
 
-impl SubAssign<Point3> for Point3 {
-    #[inline]
-    fn sub_assign(&mut self, v: Point3) {
+impl SubAssign<Vec3> for Vec3 {
+    fn sub_assign(&mut self, v: Vec3) {
         self.x -= v.x;
         self.y -= v.y;
         self.z -= v.z;
     }
 }
 
-impl Mul<f32> for Point3 {
-    type Output = Point3;
-    #[inline]
-    fn mul(self, rhs: f32) -> Self::Output {
-        Point3 {
+impl Mul<f64> for Vec3 {
+    type Output = Vec3;
+    fn mul(self, rhs: f64) -> Self::Output {
+        Vec3 {
             x: self.x * rhs,
             y: self.y * rhs,
             z: self.z * rhs,
@@ -174,30 +153,27 @@ impl Mul<f32> for Point3 {
     }
 }
 
-impl Mul<Point3> for f32 {
-    type Output = Point3;
-    #[inline]
-    fn mul(self, rhs: Point3) -> Self::Output {
+impl Mul<Vec3> for f64 {
+    type Output = Vec3;
+    fn mul(self, rhs: Vec3) -> Self::Output {
         rhs * self
     }
 }
 
-impl MulAssign<f32> for Point3 {
-    #[inline]
-    fn mul_assign(&mut self, rhs: f32) {
+impl MulAssign<f64> for Vec3 {
+    fn mul_assign(&mut self, rhs: f64) {
         self.x *= rhs;
         self.y *= rhs;
         self.z *= rhs;
     }
 }
 
-impl Div<f32> for Point3 {
-    type Output = Point3;
-    #[inline]
-    fn div(self, rhs: f32) -> Self::Output {
+impl Div<f64> for Vec3 {
+    type Output = Vec3;
+    fn div(self, rhs: f64) -> Self::Output {
         debug_assert!(rhs != 0.0, "Division by zero");
         let inv = 1.0 / rhs;
-        Point3 {
+        Vec3 {
             x: self.x * inv,
             y: self.y * inv,
             z: self.z * inv,
@@ -205,9 +181,8 @@ impl Div<f32> for Point3 {
     }
 }
 
-impl DivAssign<f32> for Point3 {
-    #[inline]
-    fn div_assign(&mut self, rhs: f32) {
+impl DivAssign<f64> for Vec3 {
+    fn div_assign(&mut self, rhs: f64) {
         debug_assert!(rhs != 0.0, "Division by zero");
         let inv = 1.0 / rhs;
         self.x *= inv;
@@ -216,36 +191,33 @@ impl DivAssign<f32> for Point3 {
     }
 }
 
-impl Index<usize> for Point3 {
-    type Output = f32;
-    #[inline]
+impl Index<usize> for Vec3 {
+    type Output = f64;
     fn index(&self, i: usize) -> &Self::Output {
         match i {
             0 => &self.x,
             1 => &self.y,
             2 => &self.z,
-            _ => panic!("Index out of bounds for Point3: {}", i),
+            _ => panic!("Index out of bounds for Vec3: {}", i),
         }
     }
 }
 
-impl IndexMut<usize> for Point3 {
-    #[inline]
+impl IndexMut<usize> for Vec3 {
     fn index_mut(&mut self, i: usize) -> &mut Self::Output {
         match i {
             0 => &mut self.x,
             1 => &mut self.y,
             2 => &mut self.z,
-            _ => panic!("Index out of bounds for Point3: {}", i),
+            _ => panic!("Index out of bounds for Vec3: {}", i),
         }
     }
 }
 
-impl std::ops::Neg for Point3 {
-    type Output = Point3;
-    #[inline]
+impl std::ops::Neg for Vec3 {
+    type Output = Vec3;
     fn neg(self) -> Self::Output {
-        Point3 {
+        Vec3 {
             x: -self.x,
             y: -self.y,
             z: -self.z,
@@ -253,11 +225,10 @@ impl std::ops::Neg for Point3 {
     }
 }
 
-impl Mul<Point3> for Point3 {
-    type Output = Point3;
-    #[inline]
-    fn mul(self, rhs: Point3) -> Self::Output {
-        Point3 {
+impl Mul<Vec3> for Vec3 {
+    type Output = Vec3;
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        Vec3 {
             x: self.x * rhs.x,
             y: self.y * rhs.y,
             z: self.z * rhs.z,
@@ -265,18 +236,17 @@ impl Mul<Point3> for Point3 {
     }
 }
 
-impl MulAssign<Point3> for Point3 {
-    #[inline]
-    fn mul_assign(&mut self, rhs: Point3) {
+impl MulAssign<Vec3> for Vec3 {
+    fn mul_assign(&mut self, rhs: Vec3) {
         self.x *= rhs.x;
         self.y *= rhs.y;
         self.z *= rhs.z;
     }
 }
 
-impl Point3 {
-    pub const X_AXIS: Point3 = Point3::new(1.0, 0.0, 0.0);
-    pub const Y_AXIS: Point3 = Point3::new(0.0, 1.0, 0.0);
-    pub const Z_AXIS: Point3 = Point3::new(0.0, 0.0, 1.0);
-    pub const ONE: Point3 = Point3::new(1.0, 1.0, 1.0);
+impl Vec3 {
+    pub const X_AXIS: Vec3 = Vec3::new(1.0, 0.0, 0.0);
+    pub const Y_AXIS: Vec3 = Vec3::new(0.0, 1.0, 0.0);
+    pub const Z_AXIS: Vec3 = Vec3::new(0.0, 0.0, 1.0);
+    pub const ONE: Vec3 = Vec3::new(1.0, 1.0, 1.0);
 }

@@ -1,18 +1,22 @@
 use std::path::Path;
 
-use super::colour::Colour;
+use crate::render::colour::Colour;
 
 pub struct Image {
-    dimension: (usize, usize),
-    pixels: Vec<Colour>
+    /// The resolution of the image, width x height.
+    resolution: (usize, usize),
+    /// Colour of each pixel.
+    pixels: Vec<Colour>,
 }
 
 impl Image {
-    pub fn new(sx: usize, sy: usize) -> Self {
-        Self {
-            dimension: (sx, sy),
-            pixels: Vec::new()
-        }
+    pub fn new(resolution: (usize, usize)) -> Self {
+        let pixels = Vec::with_capacity(resolution.0 * resolution.1);
+        Self { resolution, pixels }
+    }
+
+    pub fn set_colour(&mut self, i: usize, j: usize, colour: Colour) {
+        self.pixels[i * self.resolution.0 + j] = colour;
     }
 
     pub fn save_to_file(self, path: &Path) {

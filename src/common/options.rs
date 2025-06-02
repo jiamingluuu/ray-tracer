@@ -4,16 +4,16 @@ use clap::Parser;
 #[command(author, version, about)]
 pub struct Options {
     #[arg(short, long, value_parser = parse_resolution)]
-    resolution: (usize, usize),
+    pub resolution: (usize, usize),
 
     #[arg(short = 'r', long, default_value_t = 5)]
-    recursion_depth: usize,
+    pub recursion_depth: usize,
 
     #[arg(short = 'o', long, default_value_t = String::from("output.ppm"))]
-    filename: String,
+    pub filename: String,
 
     #[arg(short = 'f', long = "focal")]
-    focal_length: f32,
+    pub focal_length: f64,
 }
 
 fn parse_resolution(s: &str) -> Result<(usize, usize), String> {

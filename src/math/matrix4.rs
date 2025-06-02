@@ -1,9 +1,9 @@
-use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign, Index, IndexMut};
+use std::ops::{Add, AddAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign};
 
-use crate::math::point4::Point4;
+use crate::math::vec4::Vec4;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Matrix4([f32; 16]);
+pub struct Matrix4([f64; 16]);
 
 impl Default for Matrix4 {
     #[rustfmt::skip]
@@ -18,11 +18,11 @@ impl Default for Matrix4 {
 }
 
 impl Matrix4 {
-    pub fn new(data: [f32; 16]) -> Self {
+    pub fn new(data: [f64; 16]) -> Self {
         Self(data)
     }
 
-    pub fn data(&self) -> &[f32; 16] {
+    pub fn data(&self) -> &[f64; 16] {
         &self.0
     }
 
@@ -67,10 +67,9 @@ impl Matrix4 {
         cofactors[15] = det3x3!(m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10]);
 
         // Calculate determinant using first row cofactor expansion
-        let det = m[0] * cofactors[0] + m[1] * cofactors[4] + 
-                m[2] * cofactors[8] + m[3] * cofactors[12];
+        let det = m[0] * cofactors[0] + m[1] * cofactors[4] + m[2] * cofactors[8] + m[3] * cofactors[12];
 
-        assert!(det.abs() > f32::EPSILON, "Matrix is not invertible");
+        assert!(det.abs() > f64::EPSILON, "Matrix is not invertible");
 
         // Divide adjugate matrix by determinant to get inverse
         let inv_det = 1.0 / det;
@@ -108,28 +107,28 @@ impl Matrix4 {
     }
 
     #[rustfmt::skip]
-    pub fn new_scale_x(x: f32) -> Self {
+    pub fn new_scale_x(x: f64) -> Self {
         let mut m = Self::new_identity();
         m.0[0] = x;
         m
     }
 
     #[rustfmt::skip]
-    pub fn new_scale_y(y: f32) -> Self {
+    pub fn new_scale_y(y: f64) -> Self {
         let mut m = Self::new_identity();
         m.0[5] = y;
         m
     }
 
     #[rustfmt::skip]
-    pub fn new_scale_z(z: f32) -> Self {
+    pub fn new_scale_z(z: f64) -> Self {
         let mut m = Self::new_identity();
         m.0[10] = z;
         m
     }
 
     #[rustfmt::skip]
-    pub fn new_rotate_x(theta: f32) -> Self {
+    pub fn new_rotate_x(theta: f64) -> Self {
         let mut m = Self::new_identity();
         m.0[5] = theta.cos();
         m.0[6] = -theta.sin();
@@ -139,7 +138,7 @@ impl Matrix4 {
     }
 
     #[rustfmt::skip]
-    pub fn new_rotate_y(theta: f32) -> Self {
+    pub fn new_rotate_y(theta: f64) -> Self {
         let mut m = Self::new_identity();
         m.0[0] = theta.cos();
         m.0[2] = theta.sin();
@@ -149,7 +148,7 @@ impl Matrix4 {
     }
 
     #[rustfmt::skip]
-    pub fn new_rotate_z(theta: f32) -> Self {
+    pub fn new_rotate_z(theta: f64) -> Self {
         let mut m = Self::new_identity();
         m.0[0] = theta.cos();
         m.0[1] = -theta.sin();
@@ -160,7 +159,7 @@ impl Matrix4 {
 
     /// Scale along the X-axis
     #[rustfmt::skip]
-    pub fn scale_x(&mut self, x: f32) {
+    pub fn scale_x(&mut self, x: f64) {
         let scale_matrix = Matrix4([
             x,   0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,
@@ -172,7 +171,7 @@ impl Matrix4 {
 
     /// Scale along the Y-axis
     #[rustfmt::skip]
-    pub fn scale_y(&mut self, y: f32) {
+    pub fn scale_y(&mut self, y: f64) {
         let scale_matrix = Matrix4([
             1.0, 0.0, 0.0, 0.0,
             0.0, y,   0.0, 0.0,
@@ -184,7 +183,7 @@ impl Matrix4 {
 
     /// Scale along the Z-axis
     #[rustfmt::skip]
-    pub fn scale_z(&mut self, z: f32) {
+    pub fn scale_z(&mut self, z: f64) {
         let scale_matrix = Matrix4([
             1.0, 0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,
@@ -197,7 +196,7 @@ impl Matrix4 {
     /// Rotate around the X-axis (pitch)
     /// Angle is in radians
     #[rustfmt::skip]
-    pub fn rotate_x(&mut self, angle: f32) {
+    pub fn rotate_x(&mut self, angle: f64) {
         let cos_a = angle.cos();
         let sin_a = angle.sin();
         let rotation_matrix = Matrix4([
@@ -212,7 +211,7 @@ impl Matrix4 {
     /// Rotate around the Y-axis (yaw)
     /// Angle is in radians
     #[rustfmt::skip]
-    pub fn rotate_y(&mut self, angle: f32) {
+    pub fn rotate_y(&mut self, angle: f64) {
         let cos_a = angle.cos();
         let sin_a = angle.sin();
         let rotation_matrix = Matrix4([
@@ -227,7 +226,7 @@ impl Matrix4 {
     /// Rotate around the Z-axis (roll)
     /// Angle is in radians
     #[rustfmt::skip]
-    pub fn rotate_z(&mut self, angle: f32) {
+    pub fn rotate_z(&mut self, angle: f64) {
         let cos_a = angle.cos();
         let sin_a = angle.sin();
         let rotation_matrix = Matrix4([
@@ -241,7 +240,7 @@ impl Matrix4 {
 
     /// Scale uniformly along all axes
     #[rustfmt::skip]
-    pub fn scale_uniform(&mut self, scale: f32) {
+    pub fn scale_uniform(&mut self, scale: f64) {
         self.scale_x(scale);
         self.scale_y(scale);
         self.scale_z(scale);
@@ -249,7 +248,7 @@ impl Matrix4 {
 
     /// Apply scaling along all three axes at once
     #[rustfmt::skip]
-    pub fn scale(&mut self, x: f32, y: f32, z: f32) {
+    pub fn scale(&mut self, x: f64, y: f64, z: f64) {
         let scale_matrix = Matrix4([
             x,   0.0, 0.0, 0.0,
             0.0, y,   0.0, 0.0,
@@ -261,7 +260,7 @@ impl Matrix4 {
 
     /// Apply translation
     #[rustfmt::skip]
-    pub fn translate(&mut self, x: f32, y: f32, z: f32) {
+    pub fn translate(&mut self, x: f64, y: f64, z: f64) {
         let translation_matrix = Matrix4([
             1.0, 0.0, 0.0, x,
             0.0, 1.0, 0.0, y,
@@ -273,15 +272,21 @@ impl Matrix4 {
 }
 
 impl Index<usize> for Matrix4 {
-    type Output = f32;
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.0[index]
+    type Output = [f64];
+
+    fn index(&self, row: usize) -> &Self::Output {
+        assert!(row < 4, "Row index {} out of bounds for 4x4 matrix", row);
+        let start = row * 4;
+        &self.0[start..start + 4]
     }
 }
 
+// Implement IndexMut for write access: m[row][col] = value
 impl IndexMut<usize> for Matrix4 {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.0[index]
+    fn index_mut(&mut self, row: usize) -> &mut Self::Output {
+        assert!(row < 4, "Row index {} out of bounds for 4x4 matrix", row);
+        let start = row * 4;
+        &mut self.0[start..start + 4]
     }
 }
 
@@ -442,15 +447,15 @@ impl MulAssign for Matrix4 {
 
 impl MulAssign<&Matrix4> for Matrix4 {
     fn mul_assign(&mut self, rhs: &Matrix4) {
-        *self = *self * (*rhs).clone();
+        *self = *self * rhs;
     }
 }
 
 // Scalar operations
-impl Mul<f32> for Matrix4 {
+impl Mul<f64> for Matrix4 {
     type Output = Matrix4;
 
-    fn mul(self, scalar: f32) -> Self::Output {
+    fn mul(self, scalar: f64) -> Self::Output {
         let mut result = [0.0; 16];
         for i in 0..16 {
             result[i] = self.0[i] * scalar;
@@ -459,15 +464,15 @@ impl Mul<f32> for Matrix4 {
     }
 }
 
-impl Mul<f32> for &Matrix4 {
+impl Mul<f64> for &Matrix4 {
     type Output = Matrix4;
 
-    fn mul(self, scalar: f32) -> Self::Output {
+    fn mul(self, scalar: f64) -> Self::Output {
         (*self).clone() * scalar
     }
 }
 
-impl Mul<Matrix4> for f32 {
+impl Mul<Matrix4> for f64 {
     type Output = Matrix4;
 
     fn mul(self, matrix: Matrix4) -> Self::Output {
@@ -475,7 +480,7 @@ impl Mul<Matrix4> for f32 {
     }
 }
 
-impl Mul<&Matrix4> for f32 {
+impl Mul<&Matrix4> for f64 {
     type Output = Matrix4;
 
     fn mul(self, matrix: &Matrix4) -> Self::Output {
@@ -483,19 +488,19 @@ impl Mul<&Matrix4> for f32 {
     }
 }
 
-impl MulAssign<f32> for Matrix4 {
-    fn mul_assign(&mut self, scalar: f32) {
+impl MulAssign<f64> for Matrix4 {
+    fn mul_assign(&mut self, scalar: f64) {
         for i in 0..16 {
             self.0[i] *= scalar;
         }
     }
 }
 
-// Matrix4 * Point4 multiplication
-impl Mul<Point4> for Matrix4 {
-    type Output = Point4;
+// Matrix4 * Vec4 multiplication
+impl Mul<Vec4> for Matrix4 {
+    type Output = Vec4;
 
-    fn mul(self, rhs: Point4) -> Self::Output {
+    fn mul(self, rhs: Vec4) -> Self::Output {
         let mut result = [0.0; 4];
         for i in 0..4 {
             let mut sum = 0.0;
@@ -511,30 +516,30 @@ impl Mul<Point4> for Matrix4 {
             }
             result[i] = sum;
         }
-        Point4::new(result[0], result[1], result[2], result[3])
+        Vec4::new(result[0], result[1], result[2], result[3])
     }
 }
 
-impl Mul<&Point4> for Matrix4 {
-    type Output = Point4;
+impl Mul<&Vec4> for Matrix4 {
+    type Output = Vec4;
 
-    fn mul(self, rhs: &Point4) -> Self::Output {
+    fn mul(self, rhs: &Vec4) -> Self::Output {
         self * *rhs
     }
 }
 
-impl Mul<Point4> for &Matrix4 {
-    type Output = Point4;
+impl Mul<Vec4> for &Matrix4 {
+    type Output = Vec4;
 
-    fn mul(self, rhs: Point4) -> Self::Output {
+    fn mul(self, rhs: Vec4) -> Self::Output {
         *self * rhs
     }
 }
 
-impl Mul<&Point4> for &Matrix4 {
-    type Output = Point4;
+impl Mul<&Vec4> for &Matrix4 {
+    type Output = Vec4;
 
-    fn mul(self, rhs: &Point4) -> Self::Output {
+    fn mul(self, rhs: &Vec4) -> Self::Output {
         *self * *rhs
     }
 }
@@ -542,75 +547,52 @@ impl Mul<&Point4> for &Matrix4 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::f32;
+    use std::f64;
 
     #[test]
     fn test_matrix_inverse() {
         // Test identity matrix inversion
         let identity = Matrix4::new([
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
         ]);
         assert_eq!(identity.inv().data(), identity.data());
 
         // Test translation matrix inversion
         let translation = Matrix4::new([
-            1.0, 0.0, 0.0, 2.0,
-            0.0, 1.0, 0.0, -3.0,
-            0.0, 0.0, 1.0, 4.0,
-            0.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 2.0, 0.0, 1.0, 0.0, -3.0, 0.0, 0.0, 1.0, 4.0, 0.0, 0.0, 0.0, 1.0,
         ]);
         let expected = Matrix4::new([
-            1.0, 0.0, 0.0, -2.0,
-            0.0, 1.0, 0.0, 3.0,
-            0.0, 0.0, 1.0, -4.0,
-            0.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, -2.0, 0.0, 1.0, 0.0, 3.0, 0.0, 0.0, 1.0, -4.0, 0.0, 0.0, 0.0, 1.0,
         ]);
         assert_eq!(translation.inv().data(), expected.data());
 
         // Test scaling matrix inversion
         let scale = Matrix4::new([
-            2.0, 0.0, 0.0, 0.0,
-            0.0, 4.0, 0.0, 0.0,
-            0.0, 0.0, 8.0, 0.0,
-            0.0, 0.0, 0.0, 1.0,
+            2.0, 0.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 8.0, 0.0, 0.0, 0.0, 0.0, 1.0,
         ]);
         let expected_scale_inv = Matrix4::new([
-            0.5, 0.0, 0.0, 0.0,
-            0.0, 0.25, 0.0, 0.0,
-            0.0, 0.0, 0.125, 0.0,
-            0.0, 0.0, 0.0, 1.0,
+            0.5, 0.0, 0.0, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.125, 0.0, 0.0, 0.0, 0.0, 1.0,
         ]);
         assert_eq!(scale.inv().data(), expected_scale_inv.data());
 
         // Test singular matrix (should return zero matrix)
         let singular = Matrix4::new([
-            1.0, 2.0, 3.0, 4.0,
-            2.0, 4.0, 6.0, 8.0,  // Row 2 is 2 * Row 1
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
+            1.0, 2.0, 3.0, 4.0, 2.0, 4.0, 6.0, 8.0, // Row 2 is 2 * Row 1
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
         ]);
         assert_eq!(singular.inv().data(), &[0.0; 16]);
 
         // Test rotation matrix inversion (should be transpose)
-        let angle = std::f32::consts::PI / 4.0; // 45 degrees
+        let angle = std::f64::consts::PI / 4.0; // 45 degrees
         let c = angle.cos();
         let s = angle.sin();
         let rotation = Matrix4::new([
-            c,   -s,  0.0, 0.0,
-            s,    c,  0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0,
+            c, -s, 0.0, 0.0, s, c, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
         ]);
         let expected_rot_inv = Matrix4::new([
-            c,    s,  0.0, 0.0,
-            -s,   c,  0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0,
+            c, s, 0.0, 0.0, -s, c, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
         ]);
-        
+
         let rot_inv = rotation.inv();
         for (a, b) in rot_inv.data().iter().zip(expected_rot_inv.data().iter()) {
             assert!((a - b).abs() < 1e-6);
@@ -618,10 +600,7 @@ mod tests {
 
         // Test inverse of inverse equals original matrix
         let transform = Matrix4::new([
-            1.0, 2.0, 3.0, 4.0,
-            0.0, 1.0, 5.0, 6.0,
-            0.0, 0.0, 1.0, 7.0,
-            0.0, 0.0, 0.0, 1.0,
+            1.0, 2.0, 3.0, 4.0, 0.0, 1.0, 5.0, 6.0, 0.0, 0.0, 1.0, 7.0, 0.0, 0.0, 0.0, 1.0,
         ]);
         let inv_inv = transform.inv().inv();
         for (a, b) in transform.data().iter().zip(inv_inv.data().iter()) {
@@ -711,9 +690,9 @@ mod tests {
             0.0, 0.0, 1.0, 4.0, // translate z by 4
             0.0, 0.0, 0.0, 1.0,
         ]);
-        let p = Point4::new(1.0, 1.0, 1.0, 1.0);
+        let p = Vec4::new(1.0, 1.0, 1.0, 1.0);
         let result = translation * p;
-        assert_eq!(result, Point4::new(3.0, 4.0, 5.0, 1.0));
+        assert_eq!(result, Vec4::new(3.0, 4.0, 5.0, 1.0));
 
         // Test scaling matrix
         let scaling = Matrix4::new([
@@ -723,10 +702,10 @@ mod tests {
             0.0, 0.0, 0.0, 1.0,
         ]);
         let result = scaling * p;
-        assert_eq!(result, Point4::new(2.0, 3.0, 4.0, 1.0));
+        assert_eq!(result, Vec4::new(2.0, 3.0, 4.0, 1.0));
 
         // Test with references
         let result_ref = &translation * &p;
-        assert_eq!(result_ref, Point4::new(3.0, 4.0, 5.0, 1.0));
+        assert_eq!(result_ref, Vec4::new(3.0, 4.0, 5.0, 1.0));
     }
 }

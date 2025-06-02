@@ -1,3 +1,1 @@
-pub struct Cube {
-
-}
+pub struct Cube {}
