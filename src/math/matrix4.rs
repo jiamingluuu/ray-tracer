@@ -547,7 +547,6 @@ impl Mul<&Vec4> for &Matrix4 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::f64;
 
     #[test]
     fn test_matrix_inverse() {

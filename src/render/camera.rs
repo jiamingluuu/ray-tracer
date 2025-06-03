@@ -64,7 +64,7 @@ impl Camera {
 
 pub struct CameraIterator<'a> {
     /// The coordinate the the camera ray in Raster Space.
-    pixel: (usize, usize),
+    pub pixel: (usize, usize),
     /// The camera used for generating ray.
     camera: &'a Camera,
 

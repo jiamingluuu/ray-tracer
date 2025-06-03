@@ -15,8 +15,8 @@ impl Image {
         Self { resolution, pixels }
     }
 
-    pub fn set_colour(&mut self, i: usize, j: usize, colour: Colour) {
-        self.pixels[i * self.resolution.0 + j] = colour;
+    pub fn set_colour(&mut self, pixel: &(usize, usize), colour: Colour) {
+        self.pixels[pixel.0 * self.resolution.0 + pixel.1] = colour;
     }
 
     pub fn save_to_file(self, path: &Path) {

@@ -35,4 +35,11 @@ impl Transform {
             inv,
         }
     }
+
+    pub fn new_identity() -> Self {
+        Self {
+            mat: Matrix4::new_identity(),
+            inv: Matrix4::new_identity(),
+        }
+    }
 }

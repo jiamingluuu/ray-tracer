@@ -27,4 +27,8 @@ impl Scene {
             .filter_map(|shape| shape.intersect(ray))
             .min_by(|r1, r2| r1.t.total_cmp(&r2.t))
     }
+
+    pub fn add_shape(&mut self, shape: Arc<dyn Shape>) {
+        self.shapes.push(shape.clone());
+    }
 }
