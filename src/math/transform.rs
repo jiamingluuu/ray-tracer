@@ -2,6 +2,7 @@ use super::{matrix4::Matrix4, vec3::Vec3};
 
 /// Transfomation used to convert the coordinate between camera and
 /// world coordinate
+#[derive(Debug, Default)]
 pub struct Transform {
     /// Camera to world matrix
     pub mat: Matrix4,

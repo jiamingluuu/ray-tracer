@@ -62,6 +62,10 @@ impl Vec3 {
             Vec3::zero()
         }
     }
+
+    pub fn to_homo(&self) -> Vec4 {
+        Vec4::new(self.x, self.y, self.z, 1.0)
+    }
 }
 
 impl Default for Vec3 {

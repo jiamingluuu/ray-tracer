@@ -6,14 +6,8 @@ use crate::math::vec4::Vec4;
 pub struct Matrix4([f64; 16]);
 
 impl Default for Matrix4 {
-    #[rustfmt::skip]
     fn default() -> Self {
-        Self([
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-        ])
+        Self::new_identity()
     }
 }
 
@@ -73,8 +67,8 @@ impl Matrix4 {
 
         // Divide adjugate matrix by determinant to get inverse
         let inv_det = 1.0 / det;
-        for i in 0..16 {
-            cofactors[i] *= inv_det;
+        for cofactor in &mut cofactors {
+            *cofactor *= inv_det;
         }
 
         // Transpose to get final inverse
@@ -166,7 +160,7 @@ impl Matrix4 {
             0.0, 0.0, 1.0, 0.0,
             0.0, 0.0, 0.0, 1.0,
         ]);
-        *self = *self * scale_matrix;
+        *self *= scale_matrix;
     }
 
     /// Scale along the Y-axis
@@ -178,7 +172,7 @@ impl Matrix4 {
             0.0, 0.0, 1.0, 0.0,
             0.0, 0.0, 0.0, 1.0,
         ]);
-        *self = *self * scale_matrix;
+        *self *= scale_matrix;
     }
 
     /// Scale along the Z-axis
@@ -190,7 +184,7 @@ impl Matrix4 {
             0.0, 0.0, z,   0.0,
             0.0, 0.0, 0.0, 1.0,
         ]);
-        *self = *self * scale_matrix;
+        *self *= scale_matrix;
     }
 
     /// Rotate around the X-axis (pitch)
@@ -205,7 +199,7 @@ impl Matrix4 {
             0.0, sin_a,  cos_a,  0.0,
             0.0, 0.0,    0.0,    1.0,
         ]);
-        *self = *self * rotation_matrix;
+        *self *= rotation_matrix;
     }
 
     /// Rotate around the Y-axis (yaw)
@@ -220,7 +214,7 @@ impl Matrix4 {
             -sin_a, 0.0, cos_a, 0.0,
             0.0,    0.0, 0.0,   1.0,
         ]);
-        *self = *self * rotation_matrix;
+        *self *= rotation_matrix;
     }
 
     /// Rotate around the Z-axis (roll)
@@ -235,7 +229,7 @@ impl Matrix4 {
             0.0,    0.0,   1.0, 0.0,
             0.0,    0.0,   0.0, 1.0,
         ]);
-        *self = *self * rotation_matrix;
+        *self *= rotation_matrix;
     }
 
     /// Scale uniformly along all axes
@@ -255,7 +249,7 @@ impl Matrix4 {
             0.0, 0.0, z,   0.0,
             0.0, 0.0, 0.0, 1.0,
         ]);
-        *self = *self * scale_matrix;
+        *self *= scale_matrix;
     }
 
     /// Apply translation
@@ -267,7 +261,7 @@ impl Matrix4 {
             0.0, 0.0, 1.0, z,
             0.0, 0.0, 0.0, 1.0,
         ]);
-        *self = *self * translation_matrix;
+        *self *= translation_matrix;
     }
 }
 
@@ -338,7 +332,7 @@ impl Add<Matrix4> for &Matrix4 {
     type Output = Matrix4;
 
     fn add(self, rhs: Matrix4) -> Self::Output {
-        (*self).clone() + rhs
+        *self + rhs
     }
 }
 
@@ -346,7 +340,7 @@ impl Add<&Matrix4> for Matrix4 {
     type Output = Matrix4;
 
     fn add(self, rhs: &Matrix4) -> Self::Output {
-        self + (*rhs).clone()
+        self + *rhs
     }
 }
 

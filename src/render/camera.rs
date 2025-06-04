@@ -84,7 +84,7 @@ impl<'a> CameraIterator<'a> {
         }
     }
 
-    pub fn next(&mut self) -> Option<Ray> {
+    pub fn next_ray(&mut self) -> Option<Ray> {
         if self.pixel.0 + 1 == self.camera.resolution.0 {
             self.pixel.0 = 0;
             self.pixel.1 += 1;

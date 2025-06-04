@@ -49,6 +49,7 @@ impl Vec4 {
 
     /// Convert to inhomogeneous coordinate.
     pub fn to_inhomo(&self) -> Vec3 {
+        debug_assert!(!self.w.is_nan() && self.w.abs().gt(&0.0));
         Vec3 {
             x: self.x / self.w,
             y: self.y / self.w,

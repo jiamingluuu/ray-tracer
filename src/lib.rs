@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+pub mod accel;
 pub mod common;
 pub mod light;
 pub mod material;
