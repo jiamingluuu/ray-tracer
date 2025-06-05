@@ -1,8 +1,11 @@
 use crate::{
     render::ray::Ray,
-    shape::{LocalHitRecord, Shape},
+    shape::{Boundable, LocalHitRecord, Sampleable, Shape},
 };
 
+use super::Geometry;
+
+/// A canonical sphere at origin with radius `r`.
 pub struct Sphere {
     /// Radius of the sphere.
     r: f64,
@@ -53,3 +56,29 @@ impl Shape for Sphere {
         })
     }
 }
+
+impl Sampleable for Sphere {
+    fn pdf(&self, p: &crate::math::vec3::Vec3, w_i: &crate::math::vec3::Vec3) -> f32 {
+        todo!()
+    }
+
+    fn sample(&self, p: &crate::math::vec3::Vec3, samples: &(f32, f32)) -> crate::math::vec3::Vec3 {
+        todo!()
+    }
+
+    fn sample_uniform(&self, samples: &(f32, f32)) -> crate::math::vec3::Vec3 {
+        todo!()
+    }
+
+    fn surface_area(&self) -> f32 {
+        todo!()
+    }
+}
+
+impl Boundable for Sphere {
+    fn bounds(&self) -> crate::accel::aabb::AABB {
+        todo!()
+    }
+}
+
+impl Geometry for Sphere { }

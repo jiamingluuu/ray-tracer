@@ -1,12 +1,13 @@
+#![allow(unused_variables)]
+
 use std::sync::Arc;
 
 use crate::{
-    material::Material,
+    material::{Material, SurfaceInteraction},
     math::transform::Transform,
     render::ray::Ray,
+    shape::{Geometry, HitRecord}
 };
-
-use super::{Geometry, HitRecord};
 
 pub struct Primitive {
     /// The real shape of the object wrapped in.
@@ -44,5 +45,9 @@ impl Primitive {
                 uv: local_hit.uv,
             }
         })
+    }
+
+    pub fn interact(&self, hit: &HitRecord) -> SurfaceInteraction {
+        self.material.interact(hit)
     }
 }

@@ -6,7 +6,7 @@ pub mod triangle;
 
 use primitive::Primitive;
 
-use crate::{accel::AABB, math::vec3::Vec3, render::ray::Ray};
+use crate::{accel::aabb::AABB, math::vec3::Vec3, render::ray::Ray};
 
 pub trait Shape {
     /// Test ray-shape intersection in object space
@@ -33,8 +33,6 @@ pub trait Boundable {
     fn bounds(&self) -> AABB;
 }
 
-pub trait SampleableShape: Shape + Sampleable {}
-pub trait BoundableShape: Shape + Boundable {}
 pub trait Geometry: Shape + Sampleable + Boundable {}
 
 /// Local space hit record (before transformation)

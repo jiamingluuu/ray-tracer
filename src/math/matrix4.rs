@@ -33,9 +33,9 @@ impl Matrix4 {
             ($a:expr, $b:expr, $c:expr,
              $d:expr, $e:expr, $f:expr,
              $g:expr, $h:expr, $i:expr) => {
-                $a * ($e * $i - $f * $h) -
-                $b * ($d * $i - $f * $g) +
-                $c * ($d * $h - $e * $g)
+                  $a * ($e * $i - $f * $h)
+                - $b * ($d * $i - $f * $g)
+                + $c * ($d * $h - $e * $g)
             };
         }
 
@@ -96,6 +96,16 @@ impl Matrix4 {
             1.0, 0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,
             0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0,
+        ])
+    }
+    
+    #[rustfmt::skip]
+    pub fn new_translate(v: [f64; 3]) -> Self {
+        Self([
+            1.0, 0.0, 0.0, v[0],
+            0.0, 1.0, 0.0, v[1],
+            0.0, 0.0, 1.0, v[2],
             0.0, 0.0, 0.0, 1.0,
         ])
     }
@@ -290,8 +300,8 @@ impl Add for Matrix4 {
 
     fn add(self, rhs: Matrix4) -> Self::Output {
         let mut result = [0.0; 16];
-        for i in 0..16 {
-            result[i] = self.0[i] + rhs.0[i];
+        for (i, r) in result.iter_mut().enumerate() {
+            *r = self.0[i] + rhs.0[i];
         }
         Matrix4(result)
     }
@@ -302,8 +312,8 @@ impl Sub for Matrix4 {
 
     fn sub(self, rhs: Matrix4) -> Self::Output {
         let mut result = [0.0; 16];
-        for i in 0..16 {
-            result[i] = self.0[i] - rhs.0[i];
+        for (i, r) in result.iter_mut().enumerate() {
+            *r = self.0[i] - rhs.0[i];
         }
         Matrix4(result)
     }
@@ -348,7 +358,7 @@ impl Add<&Matrix4> for &Matrix4 {
     type Output = Matrix4;
 
     fn add(self, rhs: &Matrix4) -> Self::Output {
-        (*self).clone() + (*rhs).clone()
+        *self + *rhs
     }
 }
 
@@ -356,7 +366,7 @@ impl Sub<Matrix4> for &Matrix4 {
     type Output = Matrix4;
 
     fn sub(self, rhs: Matrix4) -> Self::Output {
-        (*self).clone() - rhs
+        *self - rhs
     }
 }
 
@@ -364,7 +374,7 @@ impl Sub<&Matrix4> for Matrix4 {
     type Output = Matrix4;
 
     fn sub(self, rhs: &Matrix4) -> Self::Output {
-        self - (*rhs).clone()
+        self - *rhs
     }
 }
 
@@ -372,7 +382,7 @@ impl Sub<&Matrix4> for &Matrix4 {
     type Output = Matrix4;
 
     fn sub(self, rhs: &Matrix4) -> Self::Output {
-        (*self).clone() - (*rhs).clone()
+        *self - *rhs
     }
 }
 
@@ -380,7 +390,7 @@ impl Mul<Matrix4> for &Matrix4 {
     type Output = Matrix4;
 
     fn mul(self, rhs: Matrix4) -> Self::Output {
-        (*self).clone() * rhs
+        *self * rhs
     }
 }
 
@@ -388,7 +398,7 @@ impl Mul<&Matrix4> for Matrix4 {
     type Output = Matrix4;
 
     fn mul(self, rhs: &Matrix4) -> Self::Output {
-        self * (*rhs).clone()
+        self * *rhs
     }
 }
 
@@ -396,7 +406,7 @@ impl Mul<&Matrix4> for &Matrix4 {
     type Output = Matrix4;
 
     fn mul(self, rhs: &Matrix4) -> Self::Output {
-        (*self).clone() * (*rhs).clone()
+        *self * *rhs
     }
 }
 
@@ -450,9 +460,9 @@ impl Mul<f64> for Matrix4 {
     type Output = Matrix4;
 
     fn mul(self, scalar: f64) -> Self::Output {
-        let mut result = [0.0; 16];
-        for i in 0..16 {
-            result[i] = self.0[i] * scalar;
+        let mut result: [f64; 16] = [0.0; 16];
+        for (i, r) in result.iter_mut().enumerate() {
+            *r = self.0[i] * scalar;
         }
         Matrix4(result)
     }
@@ -462,7 +472,7 @@ impl Mul<f64> for &Matrix4 {
     type Output = Matrix4;
 
     fn mul(self, scalar: f64) -> Self::Output {
-        (*self).clone() * scalar
+        *self * scalar
     }
 }
 
@@ -478,7 +488,7 @@ impl Mul<&Matrix4> for f64 {
     type Output = Matrix4;
 
     fn mul(self, matrix: &Matrix4) -> Self::Output {
-        (*matrix).clone() * self
+        *matrix * self
     }
 }
 
@@ -543,35 +553,29 @@ mod tests {
     use super::*;
 
     #[test]
+    #[rustfmt::skip]
     fn test_matrix_inverse() {
         // Test identity matrix inversion
-        let identity = Matrix4::new([
-            1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-        ]);
+        let identity = Matrix4::new_identity();
         assert_eq!(identity.inv().data(), identity.data());
 
         // Test translation matrix inversion
-        let translation = Matrix4::new([
-            1.0, 0.0, 0.0, 2.0, 0.0, 1.0, 0.0, -3.0, 0.0, 0.0, 1.0, 4.0, 0.0, 0.0, 0.0, 1.0,
-        ]);
-        let expected = Matrix4::new([
-            1.0, 0.0, 0.0, -2.0, 0.0, 1.0, 0.0, 3.0, 0.0, 0.0, 1.0, -4.0, 0.0, 0.0, 0.0, 1.0,
-        ]);
+        let translation = Matrix4::new_translate([2.0, -3.0, 4.0]);
+        let expected = Matrix4::new_translate([-2.0, 3.0, -4.0]);
         assert_eq!(translation.inv().data(), expected.data());
 
         // Test scaling matrix inversion
-        let scale = Matrix4::new([
-            2.0, 0.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 8.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-        ]);
-        let expected_scale_inv = Matrix4::new([
-            0.5, 0.0, 0.0, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.125, 0.0, 0.0, 0.0, 0.0, 1.0,
-        ]);
+        let scale = Matrix4::new_scale_x(3.0);
+        let expected_scale_inv = Matrix4::new_scale_x(1.0 / 3.0);
         assert_eq!(scale.inv().data(), expected_scale_inv.data());
 
         // Test singular matrix (should return zero matrix)
+        // TODO: Catch the panic in the testcase.
         let singular = Matrix4::new([
-            1.0, 2.0, 3.0, 4.0, 2.0, 4.0, 6.0, 8.0, // Row 2 is 2 * Row 1
-            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            1.0, 2.0, 3.0, 4.0, 
+            2.0, 4.0, 6.0, 8.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
         ]);
         assert_eq!(singular.inv().data(), &[0.0; 16]);
 
@@ -616,7 +620,7 @@ mod tests {
     fn test_subtraction() {
         let a = Matrix4::new([5.0; 16]);
         let b = Matrix4::new([2.0; 16]);
-        let c = a - &b;
+        let c = a - b;
 
         for &val in c.data() {
             assert_eq!(val, 3.0);
@@ -698,7 +702,7 @@ mod tests {
         assert_eq!(result, Vec4::new(2.0, 3.0, 4.0, 1.0));
 
         // Test with references
-        let result_ref = &translation * &p;
+        let result_ref = translation * p;
         assert_eq!(result_ref, Vec4::new(3.0, 4.0, 5.0, 1.0));
     }
 }
