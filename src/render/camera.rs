@@ -1,26 +1,19 @@
-use crate::math::{transform::Transform, vec3::Vec3, vec4::Vec4};
+use crate::{
+    math::{transform::Transform, vec3::Vec3, vec4::Vec4},
+    render::film::Film,
+};
 
 use super::ray::Ray;
 
 pub struct Camera {
-    /// The location of camera center.
-    pub e: Vec3,
-    /// The gaze direction.
-    pub g: Vec3,
-    /// The up vector.
-    pub t: Vec3,
-
     /// Focal length.
-    pub f: f64,
+    f: f64,
+    e: Vec3,
 
     /// Camera-world transformation.
-    pub transform: Transform,
-
-    pub window_top: f64,
-    pub window_left: f64,
-    pub image_size: (f64, f64),
-
-    pub resolution: (usize, usize),
+    camera_to_world: Transform,
+    raster_to_camera: Transform,
+    film: Film,
 }
 
 impl Camera {
@@ -33,76 +26,32 @@ impl Camera {
         g: Vec3,
         t: Vec3,
         f: f64,
-        window_top: f64,
-        window_left: f64,
-        image_size: (f64, f64),
         resolution: (usize, usize),
+        filename: String,
     ) -> Self {
         let w = -g.normalized();
         let u = t.cross(&w).normalized();
         let v = w.cross(&u);
-        let transform = Transform::new(e, u, v, w);
-
+        let camera_to_world = Transform::new(e, u, v, w);
+        let raster_to_camera = Transform::new_identity();
+        let film = Film::new(resolution, filename);
         Self {
-            e,
-            g,
-            t,
             f,
-            transform,
-            window_top,
-            window_left,
-            image_size,
-            resolution,
+            e,
+            camera_to_world,
+            raster_to_camera,
+            film,
         }
     }
 
-    pub fn cast_ray(&self, i: usize, j: usize) -> Ray {
-        debug_assert!(i < self.resolution.0 && j < self.resolution.1);
-        todo!()
-    }
-}
-
-pub struct CameraIterator<'a> {
-    /// The coordinate the the camera ray in Raster Space.
-    pub pixel: (usize, usize),
-    /// The camera used for generating ray.
-    camera: &'a Camera,
-
-    du: f64,
-    dv: f64,
-}
-
-impl<'a> CameraIterator<'a> {
-    pub fn new(camera: &'a Camera) -> Self {
-        let du = camera.image_size.0 / (camera.resolution.0 - 1) as f64;
-        let dv = -1.0 * camera.image_size.1 / (camera.resolution.1 - 1) as f64;
-        Self {
-            pixel: (0, 0),
-            camera,
-            du,
-            dv,
-        }
-    }
-
-    pub fn next_ray(&mut self) -> Option<Ray> {
-        if self.pixel.0 + 1 == self.camera.resolution.0 {
-            self.pixel.0 = 0;
-            self.pixel.1 += 1;
-        }
-        if self.pixel.1 == self.camera.resolution.1 {
+    pub fn get_camera_sample(&self, raster: (usize, usize)) -> Option<Ray> {
+        if raster.0 >= self.film.resolution.0 || raster.1 >= self.film.resolution.1 {
             return None;
         }
-
-        let p = Vec4::new(
-            self.camera.window_left + self.pixel.0 as f64 * self.du,
-            self.camera.window_top + self.pixel.1 as f64 * self.dv,
-            self.camera.f,
-            1.0,
-        )
-        .to_world(&self.camera.transform)
-        .to_inhomo()
-        .normalize();
-        let d = p - self.camera.e;
-        Some(Ray { p, d })
+        let r = Vec3::new(raster.0 as f64, raster.1 as f64 , 0.0);
+        let p_camera = self.raster_to_camera.mat * r;
+        let p = self.camera_to_world.mat * p_camera;
+        let d = - (self.e - p);
+        Some(Ray::new(p, d))
     }
 }

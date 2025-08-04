@@ -39,8 +39,7 @@ impl Matrix4 {
             };
         }
 
-        // Calculate cofactors with signs
-        cofactors[0] = det3x3!(m[5], m[6], m[7], m[9], m[10], m[11], m[13], m[14], m[15]);
+        // Calculate cofactors with signs cofactors[0] = det3x3!(m[5], m[6], m[7], m[9], m[10], m[11], m[13], m[14], m[15]);
         cofactors[1] = -det3x3!(m[4], m[6], m[7], m[8], m[10], m[11], m[12], m[14], m[15]);
         cofactors[2] = det3x3!(m[4], m[5], m[7], m[8], m[9], m[11], m[12], m[13], m[15]);
         cofactors[3] = -det3x3!(m[4], m[5], m[6], m[8], m[9], m[10], m[12], m[13], m[14]);
